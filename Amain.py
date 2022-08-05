@@ -61,21 +61,19 @@ async def next_photo(call: types.CallbackQuery):
 
 @dp.callback_query_handler(text='back')
 async def previous_photo(call: types.CallbackQuery):
-    if shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 4:
-        await bot.delete_message(call.from_user.id, call.message.message_id)
-        shop.update_one({'user': call.from_user.id},
+    if shop.find({'user': call.from_user.id}).distinct('photo')[-1] <= 4 or shop.find({'user': call.from_user.id}).distinct('photo')[-1] >= 2:
+        if shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 2:
+            await bot.delete_message(call.from_user.id, call.message.message_id)
+            shop.update_one({'user': call.from_user.id},
                         {'$set': {'photo': int(shop.find({'user': call.from_user.id}).distinct('photo')[-1]) - 1}})
-        await bot.send_photo(call.message.chat.id, photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'), caption="Hello! Write me something! 2", reply_markup=middle_btn)
-    elif shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 3:
-        await bot.delete_message(call.from_user.id, call.message.message_id)
-        shop.update_one({'user': call.from_user.id},
+            await bot.send_photo(call.message.chat.id,
+                             photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'),
+                             caption="Hello! Write me something! 2", reply_markup=start_btn)
+        else:
+            await bot.delete_message(call.from_user.id, call.message.message_id)
+            shop.update_one({'user': call.from_user.id},
                         {'$set': {'photo': int(shop.find({'user': call.from_user.id}).distinct('photo')[-1]) - 1}})
-        await bot.send_photo(call.message.chat.id, photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'), caption="Hello! Write me something! 2", reply_markup=middle_btn)
-    elif shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 2:
-        await bot.delete_message(call.from_user.id, call.message.message_id)
-        shop.update_one({'user': call.from_user.id},
-                        {'$set': {'photo': int(shop.find({'user': call.from_user.id}).distinct('photo')[-1]) - 1}})
-        await bot.send_photo(call.message.chat.id, photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'), caption="Hello! Write me something! 2", reply_markup=start_btn)
+            await bot.send_photo(call.message.chat.id, photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'), caption="Hello! Write me something! 2", reply_markup=middle_btn)
 
 
 if __name__ == '__main__':
