@@ -5,3 +5,4 @@ names = {
     3: 'Product name № 3',
     4: 'Product name № 4'
 }
+
