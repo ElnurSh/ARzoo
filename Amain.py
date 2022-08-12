@@ -25,7 +25,7 @@ end_btn = InlineKeyboardMarkup().add(order_btn).row(back_btn)
 markup_request = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(
     KeyboardButton('Əlaqə nömrəmi göndər ☎️', request_contact=True))
 # *****************************************************************
-#-1001773224811
+
 @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     try:
@@ -38,22 +38,26 @@ async def process_start_command(message: types.Message):
                     {'$set': {'photo': int(shop.find({'user': message.from_user.id}).distinct('photo')[-1]) + 1}})
     await bot.send_photo(message.chat.id,
                          photo=open(f"{shop.find({'user': message.from_user.id}).distinct('photo')[-1]}.jpg", 'rb'),
-                         caption=names[shop.find({'user': message.from_user.id}).distinct('photo')[-1]],
+                         caption=f"<strong>Məhsulun adı: <i>{names[shop.find({'user': message.from_user.id}).distinct('photo')[-1]][0]}</i></strong>"
+                                 f"\n<strong>Qiyməti: <i>{names[shop.find({'user': message.from_user.id}).distinct('photo')[-1]][1]}</i></strong>",
+                         parse_mode='HTML',
                          reply_markup=start_btn)
 
 
 @dp.callback_query_handler(text='next')
 async def next_photo(call: types.CallbackQuery):
     if shop.find({'user': call.from_user.id}).distinct('photo')[-1] >= 1 or \
-            shop.find({'user': call.from_user.id}).distinct('photo')[-1] <= 3:
-        if shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 3:
+            shop.find({'user': call.from_user.id}).distinct('photo')[-1] <= 10:
+        if shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 10:
             shop.update_one({'user': call.from_user.id},
                             {'$set': {'photo': int(shop.find({'user': call.from_user.id}).distinct('photo')[-1]) + 1}})
             await bot.delete_message(call.from_user.id, call.message.message_id)
             await bot.send_photo(call.message.chat.id,
                                  photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg",
                                             'rb'),
-                                 caption=names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]],
+                                 caption=f"<strong>Məhsulun adı: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][0]}</i></strong>"
+                                         f"\n<strong>Qiyməti: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][1]}</i></strong>",
+                                 parse_mode='HTML',
                                  reply_markup=end_btn)
         else:
             shop.update_one({'user': call.from_user.id},
@@ -62,13 +66,15 @@ async def next_photo(call: types.CallbackQuery):
             await bot.send_photo(call.message.chat.id,
                                  photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg",
                                             'rb'),
-                                 caption=names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]],
+                                 caption=f"<strong>Məhsulun adı: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][0]}</i></strong>"
+                                         f"\n<strong>Qiyməti: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][1]}</i></strong>",
+                                 parse_mode='HTML',
                                  reply_markup=middle_btn)
 
 
 @dp.callback_query_handler(text='back')
 async def previous_photo(call: types.CallbackQuery):
-    if shop.find({'user': call.from_user.id}).distinct('photo')[-1] <= 4 or \
+    if shop.find({'user': call.from_user.id}).distinct('photo')[-1] <= 11 or \
             shop.find({'user': call.from_user.id}).distinct('photo')[-1] >= 2:
         if shop.find({'user': call.from_user.id}).distinct('photo')[-1] == 2:
             await bot.delete_message(call.from_user.id, call.message.message_id)
@@ -77,7 +83,9 @@ async def previous_photo(call: types.CallbackQuery):
             await bot.send_photo(call.message.chat.id,
                                  photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg",
                                             'rb'),
-                                 caption=names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]],
+                                 caption=f"<strong>Məhsulun adı: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][0]}</i></strong>"
+                                         f"\n<strong>Qiyməti: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][1]}</i></strong>",
+                                 parse_mode='HTML',
                                  reply_markup=start_btn)
         else:
             await bot.delete_message(call.from_user.id, call.message.message_id)
@@ -86,15 +94,18 @@ async def previous_photo(call: types.CallbackQuery):
             await bot.send_photo(call.message.chat.id,
                                  photo=open(f"{shop.find({'user': call.from_user.id}).distinct('photo')[-1]}.jpg",
                                             'rb'),
-                                 caption=names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]],
+                                 caption=f"<strong>Məhsulun adı: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][0]}</i></strong>"
+                                         f"\n<strong>Qiyməti: <i>{names[shop.find({'user': call.from_user.id}).distinct('photo')[-1]][1]}</i></strong>",
+                                 parse_mode='HTML',
                                  reply_markup=middle_btn)
 
 
 @dp.callback_query_handler(text='order')
 async def user_order(call: types.CallbackQuery):
     await bot.delete_message(call.from_user.id, call.message.message_id)
-    await bot.send_message(call.message.chat.id, "📱 Sifarişi tamamlamaq üçün əlaqə \nnömrənizi göndərməyiniz şərtdir❗",
-                           reply_markup=markup_request)
+    await bot.send_message(call.message.chat.id, "📱 Sifarişi tamamlamaq üçün əlaqə \nnömrənizi göndərməyiniz şərtdir❗"
+                                                 "\nBunun üçün <b>Əlaqə nömrəmi göndər ☎</b> düyməsini klikləyin",
+                                                    parse_mode='HTML', reply_markup=markup_request)
 
 
 @dp.message_handler(content_types=['contact'])
@@ -106,7 +117,7 @@ async def contact(message):
                                parse_mode='HTML')
         shop.update_one({'user': message.contact.user_id},
                         {'$set': {'phone': message.contact.phone_number,
-                                  'product': names[shop.find({'user': message.from_user.id}).distinct('photo')[-1]],
+                                  'product': names[shop.find({'user': message.from_user.id}).distinct('photo')[-1]][0],
                                   'order_time': ctime()}})
         await bot.send_message(channel_id, f"Sifarişçi: <b>{message.contact.first_name}</b>\n"
                                            f"Əlaqə nömrəsi: <b>{message.contact.phone_number}</b>\n"
